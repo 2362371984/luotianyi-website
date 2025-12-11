@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>洛天依 - Luo Tianyi | 华风夏韵，洛水天依</title>
+    <meta name="description" content="洛天依是基于VOCALOID技术的中国虚拟歌手，用歌声传递幸福与感动的虚拟歌手">
+    <meta name="keywords" content="洛天依,虚拟歌手,VOCALOID,中文虚拟偶像,古风音乐">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React and ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for JSX transformation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Lucide React Icons -->
+    <script src="https://unpkg.com/lucide-react@latest/dist/umd/lucide-react.js"></script>
+    
+    <style>
+        /* 自定义样式 */
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .gradient-text {
+            background: linear-gradient(45deg, #3b82f6, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* MiniMax浮动球样式 */
+        #minimax-floating-ball {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 12px;
+            background: #222222;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            color: #F8F8F8;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            z-index: 9999;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        #minimax-floating-ball:hover {
+            transform: translateY(-2px);
+            background: #383838;
+        }
+        
+        .minimax-ball-content {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .minimax-logo-wave {
+            width: 26px;
+            height: 22px;
+            background: linear-gradient(45deg, #3b82f6, #06b6d4);
+            border-radius: 4px;
+        }
+        
+        .minimax-ball-text {
+            font-size: 12px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        
+        .minimax-close-icon {
+            margin-left: 8px;
+            font-size: 16px;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+        }
+        
+        .minimax-close-icon:hover {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="root"></div>
+
+    <!-- 修改后的音乐数据 -->
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { Music, Home, Crown, Music2, Star, Volume2, Menu, X } = lucideReact;
+
+        // 修改后的音乐数据
+        const musicData = {
+            神话曲: {
+                icon: Crown,
+                description: "播放量超过1000万的传奇作品",
+                color: "from-yellow-400 to-orange-500",
+                songs: [
+                    {
+                        title: "权御天下",
+                        year: "2015",
+                        description: "气势恢宏的古风神曲，展现了洛天依强大的表现力",
+                        plays: "1400万+",
+                        tags: ["古风", "励志", "经典"],
+                        url: "https://www.bilibili.com/video/BV1fx411A7hz/"
+                    },
+                    {
+                        title: "普通DISCO",
+                        year: "2015",
+                        description: "现象级歌曲，让洛天依在二次元圈层名声大噪",
+                        plays: "2200万+",
+                        tags: ["电子", "流行", "经典"],
+                        url: "https://www.bilibili.com/video/BV1zs411S7sz/"
+                    },
+                    {
+                        title: "达拉崩吧",
+                        year: "2017",
+                        description: "充满魔性的神曲，展现了洛天依的可爱一面",
+                        plays: "1500万+",
+                        tags: ["可爱", "魔性", "流行"],
+                        url: "https://www.bilibili.com/video/BV1sx411k7ug/"
+                    },
+                    {
+                        title: "勾指起誓",
+                        year: "2019",
+                        description: "温柔治愈的歌曲，深受粉丝喜爱",
+                        plays: "1900万+",
+                        tags: ["温柔", "治愈", "抒情"],
+                        url: "https://www.bilibili.com/video/BV1Jb411U7u2/"
+                    },
+                    {
+                        title: "万古生香",
+                        year: "2020",
+                        description: "古典与现代完美融合的杰作",
+                        plays: "1100万+",
+                        tags: ["古风", "唯美", "经典"],
+                        url: "https://www.bilibili.com/video/BV1KJ411C7CW/"
+                    }
+                ]
+            },
+            传说曲: {
+                icon: Music2,
+                description: "播放量超过100万的经典作品",
+                color: "from-blue-400 to-purple-500",
+                songs: [
+                    {
+                        title: "千年食谱颂",
+                        year: "2012",
+                        description: "洛天依的经典早期作品，充满中华文化韵味",
+                        plays: "200万+",
+                        tags: ["古风", "文化", "经典"],
+                        url: "https://www.bilibili.com/video/BV1Jx411F7tf/"
+                    },
+                    {
+                        title: "三月雨",
+                        year: "2012",
+                        description: "清新淡雅的歌曲，如春雨般温柔",
+                        plays: "100万+",
+                        tags: ["清新", "抒情", "温柔"],
+                        url: "https://www.bilibili.com/video/BV1vx411F7Ey/"
+                    },
+                    {
+                        title: "66CCFF",
+                        year: "2012",
+                        description: "以洛天依代表色命名的特别歌曲",
+                        plays: "100万+",
+                        tags: ["特别", "代表作", "纪念"],
+                        url: "https://www.bilibili.com/video/BV1ix411F7TB/"
+                    },
+                    {
+                        title: "霜雪千年",
+                        year: "2015", // ✅ 修改1：《霜雪千年》年份改为2015年
+                        description: "古典美学与现代音乐的完美结合",
+                        plays: "500万+",
+                        tags: ["古风", "唯美", "深情"],
+                        url: "https://www.bilibili.com/video/BV1es41127Fd/"
+                    },
+                    {
+                        title: "珍珠",
+                        year: "2025", // ✅ 修改2：《珍珠》年份改为2025年
+                        description: "温柔治愈的抒情歌曲，展现洛天依细腻的情感表达",
+                        plays: "200万+",
+                        tags: ["抒情", "治愈", "温柔"],
+                        url: "https://www.bilibili.com/video/BV1ZuGgzgENF/"
+                    },
+                    {
+                        title: "纯蓝", // ✅ 新增9：传说曲加入《纯蓝》
+                        year: "2024",
+                        description: "如海水般深邃清澈的蓝色主题歌曲",
+                        plays: "300万+",
+                        tags: ["蓝色", "深情", "治愈"],
+                        url: "https://www.bilibili.com/video/BV1z64y1b7H4/?spm_id_from=333.337.search-card.all.click&vd_source=e017b298a3ae21a53556af0a583a9c26"
+                    }
+                ]
+            },
+            精选作品: {
+                icon: Home,
+                description: "其他备受喜爱的代表作品",
+                color: "from-pink-400 to-red-500",
+                songs: [
+                    {
+                        title: "追光使者",
+                        year: "2017", // ✅ 修改3：《追光使者》年份改为2017年
+                        description: "充满希望和正能量的励志歌曲",
+                        plays: "100万+",
+                        tags: ["励志", "正能量", "希望"],
+                        url: "https://www.bilibili.com/video/BV14s411Y7Y3/"
+                    },
+                    {
+                        title: "上山岗",
+                        year: "2019", // ✅ 修改4：《上山岗》年份改为2019年
+                        description: "充满力量感的励志歌曲，展现积极向上的精神",
+                        plays: "400万+",
+                        tags: ["励志", "力量", "积极"],
+                        url: "https://www.bilibili.com/video/BV1zJ411479H/"
+                    },
+                    {
+                        title: "蝴蝶",
+                        year: "2024", // ✅ 修改5：《蝴蝶》年份改为2024年
+                        description: "唯美梦幻的歌曲，如蝴蝶般轻盈优美",
+                        plays: "100万+",
+                        tags: ["唯美", "梦幻", "轻盈"],
+                        url: "https://www.bilibili.com/festival/binghuogehuimanyouji?bvid=BV1A14Se6EHy"
+                    },
+                    {
+                        title: "夏虫",
+                        year: "2021", // ✅ 修改6：《夏虫》年份改为2021年
+                        description: "充满夏日活力的清新歌曲",
+                        plays: "200万+",
+                        tags: ["夏日", "清新", "活力"],
+                        url: "https://www.bilibili.com/video/BV1Hf4y1L7MF/"
+                    },
+                    {
+                        title: "白鸟过河滩",
+                        year: "2022", // ✅ 修改7：《白鸟过河滩》年份改为2022年，播放量改为600万+
+                        description: "诗意深远的古风佳作，如白鸟般优雅",
+                        plays: "600万+",
+                        tags: ["古风", "诗意", "优雅"],
+                        url: "https://www.bilibili.com/video/BV1wT4y1k7Pw/"
+                    },
+                    {
+                        title: "聘书", // ✅ 新增8：精选作品加入《聘书》
+                        year: "2023",
+                        description: "充满正式感的现代流行歌曲",
+                        plays: "150万+",
+                        tags: ["现代", "流行", "正式"],
+                        url: "https://www.bilibili.com/festival/ltyyxj2?bvid=BV1PP9CYBEg3&spm_id_from=333.337.search-card.all.click"
+                    }
+                ]
+            }
+        };
+
+        // 修改后的BILIBILI链接
+        const modifiedBilibiliLink = "https://space.bilibili.com/36081646/dynamic?spm_id_from=333.1365.list.card_avatar.click";
+
+        // 头部组件
+        function Header({ activeSection, setActiveSection }) {
+            const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+            const [scrolled, setScrolled] = useState(false);
+            
+            const navItems = [
+                { id: "hero", label: "首页", icon: Home },
+                { id: "about", label: "角色背景", icon: Music },
+                { id: "music", label: "音乐作品", icon: Music },
+                { id: "timeline", label: "发展历程", icon: Star },
+                { id: "gallery", label: "视觉画廊", icon: Music }
+            ];
+
+            useEffect(() => {
+                const handleScroll = () => {
+                    setScrolled(window.scrollY > 50);
+                };
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            const scrollToSection = (sectionId) => {
+                const element = document.getElementById(sectionId);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                    setActiveSection(sectionId);
+                    setMobileMenuOpen(false);
+                }
+            };
+
+            return (
+                <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+                    scrolled ? 'bg-white/90 backdrop-blur-md shadow-lg border-b border-blue-100' : 'bg-transparent'
+                }`}>
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex items-center justify-between h-16">
+                            <div className="flex items-center space-x-3">
+                                <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-full flex items-center justify-center">
+                                    <span className="text-white font-bold text-lg">洛</span>
+                                </div>
+                                <span className="font-bold text-xl text-gray-800">洛天依</span>
+                            </div>
+                            
+                            <nav className="hidden md:flex items-center space-x-8">
+                                {navItems.map(item => (
+                                    <button
+                                        key={item.id}
+                                        onClick={() => scrollToSection(item.id)}
+                                        className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
+                                            activeSection === item.id 
+                                                ? 'bg-blue-100 text-blue-600' 
+                                                : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                                        }`}
+                                    >
+                                        <item.icon size={18} />
+                                        <span>{item.label}</span>
+                                    </button>
+                                ))}
+                            </nav>
+                            
+                            <button
+                                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                                className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                            >
+                                {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                            </button>
+                        </div>
+                        
+                        {mobileMenuOpen && (
+                            <div className="md:hidden border-t border-gray-200 bg-white/95 backdrop-blur-md">
+                                <nav className="py-4 space-y-2">
+                                    {navItems.map(item => (
+                                        <button
+                                            key={item.id}
+                                            onClick={() => scrollToSection(item.id)}
+                                            className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                                                activeSection === item.id 
+                                                    ? 'bg-blue-100 text-blue-600' 
+                                                    : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                                            }`}
+                                        >
+                                            <item.icon size={20} />
+                                            <span>{item.label}</span>
+                                        </button>
+                                    ))}
+                                </nav>
+                            </div>
+                        )}
+                    </div>
+                </header>
+            );
+        }
+
+        // 音乐作品组件
+        function MusicSection() {
+            const [activeCategory, setActiveCategory] = useState("神话曲");
+
+            const openLink = (url) => {
+                window.open(url, '_blank');
+            };
+
+            return (
+                <div className="bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 py-20">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="text-center mb-16">
+                            <h2 className="text-4xl font-bold text-gray-800 mb-4">音乐作品</h2>
+                            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                                洛天依拥有众多脍炙人口的音乐作品，从古风到流行，从治愈到励志，每一首都承载着独特的情感与故事
+                            </p>
+                        </div>
+                        
+                        <div className="flex flex-wrap justify-center gap-4 mb-12">
+                            {Object.entries(musicData).map(([category, data]) => (
+                                <button
+                                    key={category}
+                                    onClick={() => setActiveCategory(category)}
+                                    className={`flex items-center space-x-2 px-6 py-3 rounded-full font-medium transition-all duration-300 transform hover:scale-105 ${
+                                        activeCategory === category 
+                                            ? `bg-gradient-to-r ${data.color} text-white shadow-lg` 
+                                            : 'bg-white text-gray-600 hover:text-gray-800 shadow-md hover:shadow-lg'
+                                    }`}
+                                >
+                                    <data.icon size={20} />
+                                    <span>{category}</span>
+                                </button>
+                            ))}
+                        </div>
+                        
+                        <div className="bg-white rounded-3xl shadow-2xl p-8 lg:p-12">
+                            <div className="text-center mb-8">
+                                <h3 className="text-3xl font-bold text-gray-800 mb-4">{activeCategory}</h3>
+                                <p className="text-gray-600">{musicData[activeCategory].description}</p>
+                            </div>
+                            
+                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {musicData[activeCategory].songs.map((song, index) => (
+                                    <div
+                                        key={index}
+                                        className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100"
+                                    >
+                                        <div className="flex items-start justify-between mb-4">
+                                            <h4 className="text-xl font-bold text-gray-800">{song.title}</h4>
+                                            <span className="bg-blue-100 text-blue-800 text-sm font-medium px-2 py-1 rounded-full">
+                                                {song.year}
+                                            </span>
+                                        </div>
+                                        
+                                        <p className="text-gray-600 text-sm mb-4 leading-relaxed">
+                                            {song.description}
+                                        </p>
+                                        
+                                        <div className="flex items-center justify-between mb-4">
+                                            <span className="text-green-600 font-semibold">🎵 {song.plays}</span>
+                                        </div>
+                                        
+                                        <div className="flex flex-wrap gap-2 mb-4">
+                                            {song.tags.map((tag, tagIndex) => (
+                                                <span
+                                                    key={tagIndex}
+                                                    className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full"
+                                                >
+                                                    {tag}
+                                                </span>
+                                            ))}
+                                        </div>
+                                        
+                                        <button
+                                            onClick={() => openLink(song.url)}
+                                            className={`w-full py-3 rounded-lg font-medium transition-all duration-300 bg-gradient-to-r ${
+                                                musicData[activeCategory].color
+                                            } text-white hover:shadow-lg transform hover:scale-105`}
+                                        >
+                                            🎵 播放歌曲
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // 主要应用组件
+        function App() {
+            const [activeSection, setActiveSection] = useState("hero");
+
+            useEffect(() => {
+                const handleScroll = () => {
+                    const sections = ["hero", "about", "music", "timeline", "gallery"];
+                    const scrollY = window.scrollY + 100;
+                    
+                    for (const section of sections) {
+                        const element = document.getElementById(section);
+                        if (element) {
+                            const offsetTop = element.offsetTop;
+                            const offsetHeight = element.offsetHeight;
+                            
+                            if (scrollY >= offsetTop && scrollY < offsetTop + offsetHeight) {
+                                setActiveSection(section);
+                                break;
+                            }
+                        }
+                    }
+                };
+
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            const scrollToSection = (sectionId) => {
+                const element = document.getElementById(sectionId);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                    setActiveSection(sectionId);
+                }
+            };
+
+            return (
+                <div className="min-h-screen">
+                    <Header activeSection={activeSection} setActiveSection={setActiveSection} />
+                    
+                    {/* Hero Section */}
+                    <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-cyan-50 to-blue-200 animate-pulse"></div>
+                        
+                        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex items-center justify-between min-h-screen py-20">
+                                <div className="flex-1 max-w-2xl">
+                                    <div className="mb-6">
+                                        <div className="inline-flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 mb-4 shadow-lg">
+                                            <Music className="text-blue-500" size={20} />
+                                            <span className="text-blue-600 font-medium">虚拟歌手</span>
+                                        </div>
+                                        
+                                        <h1 className="text-6xl lg:text-7xl font-bold text-gray-800 mb-4 leading-tight">
+                                            洛天依
+                                            <span className="block text-4xl lg:text-5xl text-blue-600 mt-2">Luo Tianyi</span>
+                                        </h1>
+                                        
+                                        <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+                                            华风夏韵，洛水天依
+                                            <br />
+                                            <span className="text-lg">用歌声传递幸福与感动的虚拟歌手</span>
+                                        </p>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-3 gap-6 mb-8">
+                                        <div className="text-center bg-white/60 backdrop-blur-sm rounded-xl p-4 shadow-lg">
+                                            <div className="text-2xl font-bold text-blue-600">2012</div>
+                                            <div className="text-sm text-gray-600">出道年份</div>
+                                        </div>
+                                        <div className="text-center bg-white/60 backdrop-blur-sm rounded-xl p-4 shadow-lg">
+                                            <div className="text-2xl font-bold text-blue-600">15岁</div>
+                                            <div className="text-sm text-gray-600">角色年龄</div>
+                                        </div>
+                                        <div className="text-center bg-white/60 backdrop-blur-sm rounded-xl p-4 shadow-lg">
+                                            <div className="text-2xl font-bold text-blue-600">156cm</div>
+                                            <div className="text-sm text-gray-600">身高</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <button
+                                        onClick={() => scrollToSection('about')}
+                                        className="group bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-8 py-4 rounded-full font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 flex items-center space-x-2"
+                                    >
+                                        <Home className="group-hover:text-pink-200 transition-colors" size={20} />
+                                        <span>探索洛天依的世界</span>
+                                    </button>
+                                </div>
+                                
+                                <div className="flex-1 flex justify-center items-center">
+                                    <div className="relative">
+                                        <div className="w-96 h-96 lg:w-[500px] lg:h-[500px] relative">
+                                            <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-cyan-400/20 rounded-full animate-pulse"></div>
+                                            <div className="absolute inset-4 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-full flex items-center justify-center">
+                                                <div className="text-6xl">🎵</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    {/* Music Section */}
+                    <MusicSection />
+                    
+                    {/* Footer */}
+                    <footer className="bg-gray-900 text-white py-12">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="text-center">
+                                <h3 className="text-2xl font-bold mb-4">洛天依官方</h3>
+                                <p className="text-gray-400 mb-6">关注官方账号获取最新动态</p>
+                                <button
+                                    onClick={() => window.open(modifiedBilibiliLink, '_blank')}
+                                    className="bg-gradient-to-r from-pink-500 to-blue-500 text-white px-8 py-3 rounded-full font-medium hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+                                >
+                                    🎵 访问BILIBILI官方
+                                </button>
+                                <div className="mt-8 pt-8 border-t border-gray-700">
+                                    <p className="text-gray-400 text-sm">
+                                        © 2025 MiniMax Agent. 华风夏韵，洛水天依
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            );
+        }
+
+        // 渲染应用
+        ReactDOM.render(<App />, document.getElementById('root'));
+
+        // 初始化浮动球
+        function initFloatingBall() {
+            const ball = document.getElementById('minimax-floating-ball');
+            if (!ball) return;
+
+            // 初始动画
+            ball.style.opacity = '0';
+            ball.style.transform = 'translateY(20px)';
+
+            setTimeout(() => {
+                ball.style.opacity = '1';
+                ball.style.transform = 'translateY(0)';
+            }, 500);
+
+            // 处理logo点击
+            const ballContent = ball.querySelector('.minimax-ball-content');
+            ballContent.addEventListener('click', function (e) {
+                e.stopPropagation();
+                window.open('https://agent.minimaxi.com/', '_blank');
+            });
+
+            // 处理关闭按钮
+            const closeIcon = ball.querySelector('.minimax-close-icon');
+            closeIcon.addEventListener('click', function (e) {
+                e.stopPropagation();
+                ball.style.opacity = '0';
+                ball.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    ball.style.display = 'none';
+                }, 300);
+            });
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initFloatingBall();
+            console.log('🎵 洛天依网站已更新，包含所有修改内容');
+        });
+    </script>
+
+    <!-- MiniMax浮动球 -->
+    <div id="minimax-floating-ball">
+        <div class="minimax-ball-content">
+            <div class="minimax-logo-wave"></div>
+            <span class="minimax-ball-text">Created by MiniMax Agent</span>
+        </div>
+        <div class="minimax-close-icon">×</div>
+    </div>
+</body>
+</html>
