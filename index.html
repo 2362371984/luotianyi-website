@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>洛天依 - Luo Tianyi | 华风夏韵，洛水天依</title>
+    <meta name="description" content="洛天依是基于VOCALOID技术的中国虚拟歌手，用歌声传递幸福与感动的虚拟歌手">
+    <meta name="keywords" content="洛天依,虚拟歌手,VOCALOID,中文虚拟偶像,古风音乐">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React and ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for JSX transformation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Lucide React Icons -->
+    <script src="https://unpkg.com/lucide-react@latest/dist/umd/lucide-react.js"></script>
+    
+    <style>
+        /* 自定义样式 */
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .gradient-text {
+            background: linear-gradient(45deg, #3b82f6, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* MiniMax浮动球样式 */
+        #minimax-floating-ball {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 12px;
+            background: #222222;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            color: white;
+            border: 2px solid #4f46e5;
+        }
+        
+        #minimax-floating-ball:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 25px rgba(79, 70, 229, 0.4);
+        }
+        
+        #minimax-logo {
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(45deg, #4f46e5, #06b6d4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- React Root -->
+    <div id="root"></div>
+    
+    <!-- MiniMax浮动球 -->
+    <div id="minimax-floating-ball" onclick="window.open('https://www.minimaxi.com', '_blank')">
+        <div id="minimax-logo">M</div>
+        <span>MiniMax</span>
+    </div>
+    
+    <!-- React Components -->
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        // 歌曲数据
+        const featuredWorks = [
+            {
+                title: "《聘书》",
+                year: 2025,
+                link: "https://www.bilibili.com/festival/ltyyxj2?bvid=BV1PP9CYBEg3&spm_id_from=333.337.search-card.all.click"
+            },
+            {
+                title: "《霜雪千年》",
+                year: 2015,
+                link: "https://www.bilibili.com/video/BV1Ax411c7m7"
+            },
+            {
+                title: "《珍珠》",
+                year: 2025,
+                link: "https://www.bilibili.com/video/BV1nW4y1P7CX"
+            },
+            {
+                title: "《追光使者》",
+                year: 2017,
+                link: "https://www.bilibili.com/video/BV1Rx411c7mV"
+            },
+            {
+                title: "《上山岗》",
+                year: 2019,
+                link: "https://www.bilibili.com/video/BV1sE4y1P7kF"
+            },
+            {
+                title: "《蝴蝶》",
+                year: 2024,
+                link: "https://www.bilibili.com/video/BV1pE4y1P7kF"
+            }
+        ];
+        
+        const legendarySongs = [
+            {
+                title: "《纯蓝》",
+                year: 2025,
+                link: "https://www.bilibili.com/video/BV1z64y1b7H4/?spm_id_from=333.337.search-card.all.click&vd_source=e017b298a3ae21a53556af0a583a9c26"
+            },
+            {
+                title: "《白鸟过河滩》",
+                year: 2022,
+                playCount: "600万+",
+                link: "https://www.bilibili.com/video/BV1gR4y1P7DX"
+            },
+            {
+                title: "《夏虫》",
+                year: 2021,
+                link: "https://www.bilibili.com/video/BV1aR4y1P7DX"
+            },
+            {
+                title: "《山水人间》",
+                year: 2020,
+                link: "https://www.bilibili.com/video/BV1xR4y1P7DX"
+            }
+        ];
+        
+        // 组件定义
+        const Header = () => {
+            const [activeSection, setActiveSection] = useState('home');
+            
+            useEffect(() => {
+                const handleScroll = () => {
+                    const sections = ['home', 'about', 'works', 'media', 'contact'];
+                    const currentSection = sections.find(section => {
+                        const element = document.getElementById(section);
+                        if (element) {
+                            const rect = element.getBoundingClientRect();
+                            return rect.top <= 100 && rect.bottom >= 100;
+                        }
+                        return false;
+                    });
+                    if (currentSection) {
+                        setActiveSection(currentSection);
+                    }
+                };
+                
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+            
+            const scrollToSection = (sectionId) => {
+                const element = document.getElementById(sectionId);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                }
+            };
+            
+            return (
+                <header className="fixed top-0 left-0 right-0 z-50 bg-gray-900/95 backdrop-blur-sm border-b border-gray-700">
+                    <div className="max-w-6xl mx-auto px-4 py-4">
+                        <div className="flex justify-between items-center">
+                            <div className="text-2xl font-bold gradient-text">
+                                洛天依
+                            </div>
+                            <nav className="hidden md:flex space-x-8">
+                                {[
+                                    { id: 'home', name: '首页' },
+                                    { id: 'about', name: '关于' },
+                                    { id: 'works', name: '作品' },
+                                    { id: 'media', name: '媒体' },
+                                    { id: 'contact', name: '联系' }
+                                ].map(item => (
+                                    <button
+                                        key={item.id}
+                                        onClick={() => scrollToSection(item.id)}
+                                        className={`transition-colors hover:text-blue-400 ${
+                                            activeSection === item.id ? 'text-blue-400' : 'text-gray-300'
+                                        }`}
+                                    >
+                                        {item.name}
+                                    </button>
+                                ))}
+                            </nav>
+                        </div>
+                    </div>
+                </header>
+            );
+        };
+        
+        const HeroSection = () => (
+            <section id="home" className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900">
+                <div className="text-center px-4">
+                    <div className="animate-float">
+                        <h1 className="text-6xl md:text-8xl font-bold mb-6 gradient-text">
+                            洛天依
+                        </h1>
+                    </div>
+                    <h2 className="text-2xl md:text-3xl mb-4 text-gray-300">
+                        Luo Tianyi
+                    </h2>
+                    <p className="text-xl md:text-2xl mb-8 text-gray-400">
+                        华风夏韵，洛水天依
+                    </p>
+                    <p className="text-lg mb-12 text-gray-500 max-w-2xl mx-auto">
+                        基于VOCALOID技术的中国虚拟歌手，用歌声传递幸福与感动的虚拟歌手
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                        <button 
+                            onClick={() => document.getElementById('works').scrollIntoView({ behavior: 'smooth' })}
+                            className="px-8 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                        >
+                            探索作品
+                        </button>
+                        <button 
+                            onClick={() => document.getElementById('about').scrollIntoView({ behavior: 'smooth' })}
+                            className="px-8 py-3 border border-gray-600 hover:border-gray-500 rounded-lg transition-colors"
+                        >
+                            了解更多
+                        </button>
+                    </div>
+                </div>
+            </section>
+        );
+        
+        const AboutSection = () => (
+            <section id="about" className="py-20 bg-gray-800">
+                <div className="max-w-6xl mx-auto px-4">
+                    <h2 className="text-4xl font-bold text-center mb-12 gradient-text">关于洛天依</h2>
+                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                        <div>
+                            <h3 className="text-2xl font-bold mb-4 text-blue-400">虚拟歌手</h3>
+                            <p className="text-gray-300 mb-6 leading-relaxed">
+                                洛天依是基于上海禾念信息科技有限公司开发的VOCALOID3语音合成引擎的虚拟歌手，
+                                是中国第一个VOCALOID中文虚拟歌手。她以其独特的嗓音和丰富的表现力，
+                                在中文音乐创作领域掀起了新的潮流。
+                            </p>
+                            <h3 className="text-2xl font-bold mb-4 text-blue-400">音乐创作</h3>
+                            <p className="text-gray-300 leading-relaxed">
+                                从2012年出道至今，洛天依已经拥有了数千首原创歌曲，涵盖了古风、流行、摇滚、
+                                民谣等多种音乐风格。她不仅是技术的产物，更是创作者情感和创意的载体。
+                            </p>
+                        </div>
+                        <div className="bg-gray-700 rounded-lg p-8">
+                            <h3 className="text-xl font-bold mb-6 text-center">基本信息</h3>
+                            <div className="space-y-4">
+                                <div className="flex justify-between">
+                                    <span className="text-gray-400">中文名：</span>
+                                    <span className="text-white">洛天依</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-400">外文名：</span>
+                                    <span className="text-white">Luo Tianyi</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-400">出道时间：</span>
+                                    <span className="text-white">2012年7月12日</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-400">声源提供者：</span>
+                                    <span className="text-white">山新</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-400">开发者：</span>
+                                    <span className="text-white">上海禾念</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        );
+        
+        const WorksSection = () => (
+            <section id="works" className="py-20 bg-gray-900">
+                <div className="max-w-6xl mx-auto px-4">
+                    <h2 className="text-4xl font-bold text-center mb-12 gradient-text">精选作品</h2>
+                    
+                    <div className="grid md:grid-cols-2 gap-12">
+                        <div>
+                            <h3 className="text-2xl font-bold mb-6 text-blue-400">精选作品</h3>
+                            <div className="space-y-4">
+                                {featuredWorks.map((work, index) => (
+                                    <div key={index} className="bg-gray-800 rounded-lg p-4 hover:bg-gray-700 transition-colors">
+                                        <div className="flex justify-between items-center">
+                                            <div>
+                                                <h4 className="font-semibold">{work.title}</h4>
+                                                <p className="text-gray-400 text-sm">{work.year}年</p>
+                                            </div>
+                                            <button 
+                                                onClick={() => window.open(work.link, '_blank')}
+                                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition-colors text-sm"
+                                            >
+                                                播放
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 className="text-2xl font-bold mb-6 text-blue-400">传说曲</h3>
+                            <div className="space-y-4">
+                                {legendarySongs.map((song, index) => (
+                                    <div key={index} className="bg-gray-800 rounded-lg p-4 hover:bg-gray-700 transition-colors">
+                                        <div className="flex justify-between items-center">
+                                            <div>
+                                                <h4 className="font-semibold">{song.title}</h4>
+                                                <div className="flex gap-4 text-sm text-gray-400">
+                                                    <span>{song.year}年</span>
+                                                    {song.playCount && <span>{song.playCount}</span>}
+                                                </div>
+                                            </div>
+                                            <button 
+                                                onClick={() => window.open(song.link, '_blank')}
+                                                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded transition-colors text-sm"
+                                            >
+                                                播放
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        );
+        
+        const MediaSection = () => (
+            <section id="media" className="py-20 bg-gray-800">
+                <div className="max-w-6xl mx-auto px-4">
+                    <h2 className="text-4xl font-bold text-center mb-12 gradient-text">媒体资源</h2>
+                    <div className="grid md:grid-cols-3 gap-8">
+                        <div className="bg-gray-700 rounded-lg p-6 text-center">
+                            <div className="text-4xl mb-4">📸</div>
+                            <h3 className="text-xl font-bold mb-2">官方图片</h3>
+                            <p className="text-gray-400 mb-4">高清官方图片资源</p>
+                            <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition-colors">
+                                下载
+                            </button>
+                        </div>
+                        <div className="bg-gray-700 rounded-lg p-6 text-center">
+                            <div className="text-4xl mb-4">🎵</div>
+                            <h3 className="text-xl font-bold mb-2">音频资源</h3>
+                            <p className="text-gray-400 mb-4">高质量音频文件</p>
+                            <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition-colors">
+                                获取
+                            </button>
+                        </div>
+                        <div className="bg-gray-700 rounded-lg p-6 text-center">
+                            <div className="text-4xl mb-4">🎬</div>
+                            <h3 className="text-xl font-bold mb-2">视频资源</h3>
+                            <p className="text-gray-400 mb-4">官方MV和演出视频</p>
+                            <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition-colors">
+                                观看
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        );
+        
+        const ContactSection = () => (
+            <section id="contact" className="py-20 bg-gray-900">
+                <div className="max-w-4xl mx-auto px-4 text-center">
+                    <h2 className="text-4xl font-bold mb-12 gradient-text">联系我们</h2>
+                    <div className="grid md:grid-cols-2 gap-8 mb-12">
+                        <div>
+                            <h3 className="text-2xl font-bold mb-4 text-blue-400">官方渠道</h3>
+                            <div className="space-y-4">
+                                <button 
+                                    onClick={() => window.open('https://space.bilibili.com/36081646/dynamic?spm_id_from=333.1365.list.card_avatar.click', '_blank')}
+                                    className="block w-full px-6 py-3 bg-pink-600 hover:bg-pink-700 rounded-lg transition-colors"
+                                >
+                                    官方B站账号
+                                </button>
+                                <button 
+                                    onClick={() => window.open('https://www.bilibili.com', '_blank')}
+                                    className="block w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                                >
+                                    Bilibili
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 className="text-2xl font-bold mb-4 text-blue-400">粉丝社区</h3>
+                            <div className="space-y-4">
+                                <button className="block w-full px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg transition-colors">
+                                    QQ群
+                                </button>
+                                <button className="block w-full px-6 py-3 bg-red-600 hover:bg-red-700 rounded-lg transition-colors">
+                                    微博
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-gray-800 rounded-lg p-8">
+                        <p className="text-gray-400 mb-4">
+                            感谢您对洛天依的关注和支持！
+                        </p>
+                        <p className="text-sm text-gray-500">
+                            © 2025 洛天依官方网站. 用心传递每一个音符.
+                        </p>
+                    </div>
+                </div>
+            </section>
+        );
+        
+        const App = () => {
+            return (
+                <div>
+                    <Header />
+                    <HeroSection />
+                    <AboutSection />
+                    <WorksSection />
+                    <MediaSection />
+                    <ContactSection />
+                </div>
+            );
+        };
+        
+        // 渲染应用
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
